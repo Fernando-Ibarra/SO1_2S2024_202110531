@@ -1,3 +1,10 @@
+# TAREA 2
+
+Enrique Fernando Gaitán Ibarra
+202110531
+
+### Bash File
+```bash
 #!/bin/bash
 
 # For loop to create 10 containers
@@ -21,3 +28,13 @@ for i in {1..10}; do
     # Run the container
     sudo docker run -d --name $name $name
 done
+```
+
+### Containers Images
+![Containers1-3](images/Docker1-3.png)
+![Containers4-6](images/Docker4-6.png)
+![Containers7-9](images/Docker7-9.png)
+![Container10](images/Docker10.png)
+
+### Containers Filter "ps aux"
+![ContainersFilter](images/filtroDocker.png)
