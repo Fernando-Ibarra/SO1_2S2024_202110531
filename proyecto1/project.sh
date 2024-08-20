@@ -2,7 +2,7 @@
 
 dockerImages=('DockerImage1' 'DockerImage2' 'DockerImage3' 'DockerImage4')
 
-for i in {1..10}; do
+for i in {1..3}; do
   # Select a random image
   image=${dockerImages[$RANDOM % ${#dockerImages[@]}]}
   echo "The image selected is: $image"

@@ -27,13 +27,16 @@ static int systeminfo_show(struct seq_file *m, void *v) {
     seq_printf(m, "\t\"free_ram\": %lu,\n", i.freeram * 4);
     seq_printf(m, "\t\"ram_in_use\": %lu,\n", (i.totalram - i.freeram) * 4);
     seq_printf(m, "\t\"processes\": [\n");
+    unsigned long current_time = jiffies;
+
     for_each_process(task) {
         
         char *string2 = task->comm;
         if ( strstr(string1,string2) != NULL ) {
             seq_printf(m, "\t\t{\n");
             seq_printf(m, "\t\t\t\"pid\": %d,\n", task->pid);
-            seq_printf(m, "\t\t\t\"name\": \"%s\",\n", task->comm);
+            seq_printf(m, "\t\t\t\"name\": \"%s\",\n", task->comm);        
+            // seq_printf(m, "\t\t\t\"cpu_usage\": %lu,\n", cpu_usage);
 
             struct mm_struct *mm = task->mm;
             if (mm) {
@@ -76,19 +79,20 @@ static int systeminfo_show(struct seq_file *m, void *v) {
                 } else {
                     seq_printf(m, "\"command_line\": \"<memory allocation failed>\",\n");
                 }
-                
-                seq_printf(m, "\t\t\t\"rss\": %lu,\n", get_mm_rss(mm) * PAGE_SIZE / 1024);
+                unsigned long rss = get_mm_rss(mm) * PAGE_SIZE;
+                seq_printf(m, "\t\t\t\"rss\": %lu,\n", rss / 1024);
                 seq_printf(m, "\t\t\t\"vsz\": %lu,\n", mm->total_vm * PAGE_SIZE / 1024);
 
                 // TODO: CPU usage
-
-                // Calcular porcentaje de CPU (simplificado, sin considerar el tiempo total del sistema)
-                float cpu_usage = (float)incremento_cpu / 1000.0 * 100; 
-                seq_printf(m, "\t\t\t\"cpu_usage\": %.4f,\n", cpu_usage);
+                
 
                 // Memory usage in percentage
-                unsigned long mem_usage = (100 * get_mm_rss(mm) * PAGE_SIZE) / (i.totalram * 4);
-                seq_printf(m, "\t\t\t\"mem_usage\": %.4ld,\n", mem_usage);               
+                unsigned long total_memory = i.totalram * i.mem_unit;
+                unsigned long mem_usage = ((100000 * rss) / total_memory)/ 100;
+                // transform mem_usage (07) to string and add a dot before the last character (0.7)
+                char mem_usage_str[10];
+                sprintf(mem_usage_str, "%lu.%lu", mem_usage / 100, mem_usage % 100);
+                seq_printf(m, "\t\t\t\"mem_usage\": %s\n", mem_usage_str);               
             }
             seq_printf(m, "\t\t},\n");
         } else {
