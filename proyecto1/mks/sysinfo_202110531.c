@@ -27,16 +27,23 @@ static int systeminfo_show(struct seq_file *m, void *v) {
     seq_printf(m, "\t\"free_ram\": %lu,\n", i.freeram * 4);
     seq_printf(m, "\t\"ram_in_use\": %lu,\n", (i.totalram - i.freeram) * 4);
     seq_printf(m, "\t\"processes\": [\n");
-    unsigned long current_time = jiffies;
-
+    uint64_t total_usage = 0;
+    uint64_t total_time_cpu = ktime_to_ns(ktime_get());
     for_each_process(task) {
+
+        uint64_t cpu_time_ns = task->utime + task->stime;
+        total_usage += cpu_time_ns;
         
         char *string2 = task->comm;
         if ( strstr(string1,string2) != NULL ) {
             seq_printf(m, "\t\t{\n");
             seq_printf(m, "\t\t\t\"pid\": %d,\n", task->pid);
             seq_printf(m, "\t\t\t\"name\": \"%s\",\n", task->comm);        
-            // seq_printf(m, "\t\t\t\"cpu_usage\": %lu,\n", cpu_usage);
+            // TODO: CPU usage
+            seq_printf(m, "\t\t\t\"total_time_cpu\": %llu,\n", total_time_cpu);
+            seq_printf(m, "\t\t\t\"cpu_time_ns\": %llu,\n", total_usage);
+            int cpu_usage =  total_time_cpu/(cpu_time_ns * 1000000);
+            seq_printf(m, "\t\t\t\"cpu_usage\": %u,\n", cpu_usage);
 
             struct mm_struct *mm = task->mm;
             if (mm) {
@@ -79,12 +86,10 @@ static int systeminfo_show(struct seq_file *m, void *v) {
                 } else {
                     seq_printf(m, "\"command_line\": \"<memory allocation failed>\",\n");
                 }
+
                 unsigned long rss = get_mm_rss(mm) * PAGE_SIZE;
                 seq_printf(m, "\t\t\t\"rss\": %lu,\n", rss / 1024);
                 seq_printf(m, "\t\t\t\"vsz\": %lu,\n", mm->total_vm * PAGE_SIZE / 1024);
-
-                // TODO: CPU usage
-                
 
                 // Memory usage in percentage
                 unsigned long total_memory = i.totalram * i.mem_unit;

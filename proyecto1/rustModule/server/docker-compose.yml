@@ -1,0 +1,14 @@
+services:
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - /logs:/logs
+  
+volumes:
+  logs:
+    external: true
