@@ -20,6 +20,8 @@ static int systeminfo_show(struct seq_file *m, void *v) {
     struct sysinfo i;
     struct task_struct *task;
     char *string1 = "containerd-shim";
+    int first_process = 1;
+    int first_docker = 1;
 
     si_meminfo(&i);
     seq_printf(m, "{\n");
@@ -27,23 +29,27 @@ static int systeminfo_show(struct seq_file *m, void *v) {
     seq_printf(m, "\t\"free_ram\": %lu,\n", i.freeram * 4);
     seq_printf(m, "\t\"ram_in_use\": %lu,\n", (i.totalram - i.freeram) * 4);
     seq_printf(m, "\t\"processes\": [\n");
-    uint64_t total_usage = 0;
-    uint64_t total_time_cpu = ktime_to_ns(ktime_get());
     for_each_process(task) {
-
-        uint64_t cpu_time_ns = task->utime + task->stime;
-        total_usage += cpu_time_ns;
-        
+    
         char *string2 = task->comm;
         if ( strstr(string1,string2) != NULL ) {
+            if (first_docker == 1) {
+                first_docker = 0;
+                continue;
+            }
+            
+            if (!first_process) {
+                seq_printf(m, ",\n");
+            }
+            first_process = 0;
+            
             seq_printf(m, "\t\t{\n");
             seq_printf(m, "\t\t\t\"pid\": %d,\n", task->pid);
-            seq_printf(m, "\t\t\t\"name\": \"%s\",\n", task->comm);        
-            // TODO: CPU usage
-            seq_printf(m, "\t\t\t\"total_time_cpu\": %llu,\n", total_time_cpu);
-            seq_printf(m, "\t\t\t\"cpu_time_ns\": %llu,\n", total_usage);
-            int cpu_usage =  total_time_cpu/(cpu_time_ns * 1000000);
-            seq_printf(m, "\t\t\t\"cpu_usage\": %u,\n", cpu_usage);
+            seq_printf(m, "\t\t\t\"name\": \"%s\",\n", task->comm);
+            unsigned long total_jiffies = jiffies;
+            unsigned long total_time = task->utime + task->stime;
+            unsigned long cpu_usage = ((total_time*10000)/total_jiffies);
+            seq_printf(m, "\t\t\t\"cpu_usage\": %lu,\n", cpu_usage);
 
             struct mm_struct *mm = task->mm;
             if (mm) {
@@ -99,12 +105,15 @@ static int systeminfo_show(struct seq_file *m, void *v) {
                 sprintf(mem_usage_str, "%lu.%lu", mem_usage / 100, mem_usage % 100);
                 seq_printf(m, "\t\t\t\"mem_usage\": %s\n", mem_usage_str);               
             }
-            seq_printf(m, "\t\t},\n");
+            seq_printf(m, "\t\t}");
+            // seq_printf(m, "\t\t},\n");
         } else {
             continue;
         }
     }
-    seq_printf(m, "\t]\n");
+    // Remove the last comma from the last process
+
+    seq_printf(m, "\n\t]\n");
     seq_printf(m, "}\n");
 
     return 0;

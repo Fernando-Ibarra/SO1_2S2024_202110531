@@ -1,0 +1,4 @@
+# ignore python venv files
+__pypackages__/
+/venv
+/__pycache__
