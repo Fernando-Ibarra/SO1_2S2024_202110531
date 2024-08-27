@@ -1,15 +1,17 @@
 use std::process::Command;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::Mutex;
 use std::time::Duration;
 use std::thread::sleep;
 use serde::{Deserialize, Serialize};
-// use reqwest::Client;
+use std::thread;
+use reqwest::Client;
 // use serde_json::json;
 // use std::collections::HashMap;
 // use anyhow::{Result, anyhow};
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 struct DockerContainerProccess {
     pid: i64,
     name: String,
@@ -29,7 +31,8 @@ struct CPU {
     processes: Vec<DockerContainerProccess>,
 }
 
-fn main()  {
+#[tokio::main]
+async fn main() {
     
     // Create a logs container (python server)
     let _log_container_id: String = build_container();
@@ -50,14 +53,18 @@ fn main()  {
         println!("-----> Ctrl+C para salir");
 
         // Analize containers status and delete them
-        read_containers(_log_container_id.clone());
+        read_containers(_log_container_id.clone()).await;
         
         // If you want to do something in each loop iteration, you can do it here
         println!("Contenedores eliminados, preparando la siguiente eliminación...");
         
         // Sleep for 10 seconds
-        sleep(Duration::from_secs(10));
+        sleep(Duration::from_secs(30));
     }
+
+    make_graphs().await;
+
+    sleep(Duration::from_secs(30));
 
     // delete log container
     let output = Command::new("sudo")
@@ -73,8 +80,6 @@ fn main()  {
 
     // Code to execute after loop is cancelled
     println!("Realizando limpieza antes de salir...");
-
-    // TODO: LAST FETCH TO SERVE TO MAKE GRAPHICS
 
 }
 
@@ -118,7 +123,7 @@ fn build_container() -> String {
 }
 
 // -> Result<(), anyhow::Error>
-fn read_containers(logs_container_id: String) {
+async fn read_containers(logs_container_id: String) {
     // read containers using cat /proc/sysinfo_202110531
     let output = Command::new("cat")
         .args(&["/proc/sysinfo_202110531"])
@@ -135,17 +140,14 @@ fn read_containers(logs_container_id: String) {
         // Use the data
         println!("Total RAM: {}", cpu.total_ram);
         println!("Free RAM: {}", cpu.free_ram);
-        // println!("Processes: {:?}", cpu.proccess);
 
         // vector to store the containers
-        let mut containers_list: Vec<DockerContainerProccess> = Vec::new();
+        let mut containers_list: Vec<DockerContainerProccess> = cpu.processes;
 
-        containers_list = cpu.processes;
+        // containers_list = cpu.processes;
+        containers_list.retain(|container| container.id_container[..12] != logs_container_id);
 
-        // delete logs_container_id of the list of containers
-        containers_list.retain(|container| container.id_container != logs_container_id);
-
-        // bubble sort algorithm to sort the containers by cpu usage
+        // bubble sort algorithm to sort the containers by cpu usage and rss and vsz
         let n = containers_list.len();
         for i in 0..n {
             for j in 0..n-i-1 {
@@ -155,41 +157,75 @@ fn read_containers(logs_container_id: String) {
             }
         }
 
-        // print the containers sorted by cpu usage
-        for container in containers_list.iter() {
-            println!("Container: {}", container.name);
-            println!("CPU Usage: {}%", container.cpu_usage);
-            println!("Command Line: {}", container.command_line);
-            println!("RSS: {} KB", container.rss);
-            println!("VSZ: {} KB", container.vsz);
-            println!("Memory Usage: {:.2}%", container.mem_usage);
-            println!("---------------------------------");
+        for i in 0..n {
+            for j in 0..n-i-1 {
+                if containers_list[j].cpu_usage == containers_list[j+1].cpu_usage {
+                    if containers_list[j].rss < containers_list[j+1].rss {
+                        containers_list.swap(j, j+1);
+                    }
+                }
+            }
         }
 
-        // TODO: ANALIZE THE CONTAINERS AND DELETE THE ONES THAT ARE IN THE MIDDLE OF THE LIST
+        for i in 0..n {
+            for j in 0..n-i-1 {
+                if containers_list[j].cpu_usage == containers_list[j+1].cpu_usage {
+                    if containers_list[j].rss == containers_list[j+1].rss {
+                        if containers_list[j].vsz < containers_list[j+1].vsz {
+                            containers_list.swap(j, j+1);
+                        }
+                    }
+                }
+            }
+        }
 
-        // TODO: FETCH TO THE SERVER THE SURVIVE CONTAINERS AND RAM USAGE 
+        // make a copy of the containers list
+        let containers_list_v2 = containers_list.clone();
+        let my_cpu_log = CPU {
+            total_ram: cpu.total_ram,
+            free_ram: cpu.free_ram,
+            ram_in_use: cpu.ram_in_use,
+            processes: containers_list_v2,
+        };
 
-        
-        // println!("Containers: {}", containers);
+        fetch_data(my_cpu_log).await;
 
-        // let containers: HashMap<String, String> = serde_json::from_str(&containers).unwrap();
-        // println!("Containers: {:?}", containers);
-        // let client = reqwest::Client::new();
-        // let res = client.post("http://localhost:8000/read-module")
-        //     .json(&containers)
-        //     .send()
-        //     .await?;
-        // println!("Response: {:?}", res);
-        // return Ok(());
+        let containers_list = Arc::new(Mutex::new(containers_list));
+
+        /* 
+            delete de the containers in the middle of the list 
+            The first 3 and the last 2 containers alive
+        */
+         if n > 5 {
+            let mut i = 0;
+            while i < n {
+                if i > 2 && i < n - 2 {
+                    let containers_list = Arc::clone(&containers_list);
+                    thread::spawn(move || {
+                        let containers_list = containers_list.lock().unwrap();
+                        let output = Command::new("sudo")
+                            .args(&["docker", "rm", "-f", &containers_list[i].id_container])
+                            .output()
+                            .expect("Failed to execute docker rm command");
+                        if output.status.success() {
+                            println!("Container {} deleted successfully", containers_list[i].id_container);
+                        } else {
+                            eprintln!("Failed to delete container");
+                            eprintln!("Error: {}", String::from_utf8_lossy(&output.stderr));
+                        }
+                    });
+                    i += 1;
+                } else {
+                    i += 1;
+                }
+            }
+        }
+
     } else {
         eprintln!("Failed to read containers");
         eprintln!("Error: {}", String::from_utf8_lossy(&output.stderr));
-        // return only an error
-        // return Err(anyhow!("Failed to read containers"));
     }
 }
-
 
 
 /*  
@@ -210,3 +246,32 @@ println!("Docker containers built and started successfully");
         }
 
 */
+
+async fn fetch_data(payload: CPU) -> Result<(), reqwest::Error> {
+    let client = Client::new();
+
+    let response = client.post("http://localhost:8000/read-module")
+        .json(&payload)
+        .send()
+        .await?
+        .text()
+        .await?;
+
+    println!("Response: {}", response);
+
+    Ok(())
+}
+
+async fn make_graphs() -> Result<(), reqwest::Error> {
+    let client = Client::new();
+
+    let response = client.post("http://localhost:8000/make-graphs")
+        .send()
+        .await?
+        .text()
+        .await?;
+
+    println!("Response: {}", response);
+
+    Ok(())
+}
