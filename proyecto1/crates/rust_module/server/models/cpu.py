@@ -8,3 +8,4 @@ class CPU(BaseModel):
     free_ram: int
     ram_in_use: int
     processes: List[Process]
+    time: str

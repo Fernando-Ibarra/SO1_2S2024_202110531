@@ -13,3 +13,5 @@ services:
 volumes:
   logs:
     external: true
+  graphs:
+    external: true

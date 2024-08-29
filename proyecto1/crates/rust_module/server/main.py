@@ -31,28 +31,62 @@ def read_module(cpu: CPU):
 
 @app.post("/make_graphs")
 def make_graphs():
-    # read logs from file and create plot graphs for total_ram, free_ram and ram_in_use
     total_ram = []
     free_ram = []
     ram_in_use = []
     time = []
     with open("logs/all-logs.json", "r") as file:
         data = json.load(file)
-        # make a for with index
-        time_value = 0
         for cpu in data:
-            time_value += 1
+            print(cpu["total_ram"])
             total_ram.append(cpu["total_ram"])
+            print(cpu["free_ram"])
             free_ram.append(cpu["free_ram"])
+            print(cpu["ram_in_use"])
             ram_in_use.append(cpu["ram_in_use"])
-            time.append(time_value)
+            time.append(cpu["time"])
                     
         plt.plot(time, total_ram, label="Total RAM")
         plt.plot(time, free_ram, label="Free RAM")
         plt.plot(time, ram_in_use, label="RAM in use")
         plt.xlabel("Time")
         plt.ylabel("RAM")
-        plt.legend()
+        plt.legend("RAM usage")
+        plt.grid()
         plt.savefig("graphs/ram.png")
         plt.close()
+    return JSONResponse(status_code=200, content={"message": "Graphs created successfully"})
+
+
+@app.post("/make_process_graphs")
+def make_process_graphs():
+    with open("logs/all-logs.json", "r") as file:
+        data = json.load(file)
+        size = len(data)
+        cols = 3
+        rows = ( size + cols - 1 ) // cols
+        fig, ax = plt.subplots( rows, cols, figsize=(10, 5 * rows))
+        cpu_values = []
+        ids = []
+        colors = ["blue", "red", "green", "yellow", "purple", "orange", "pink", "brown", "black", "gray"]
+        for cpu in data:
+            cpu_array = []
+            id_container = []
+            for process in cpu["processes"]:
+                cpu_array.append(process["cpu_usage"])
+                id_container.append(process["id_container"][:3])
+            cpu_values.append(cpu_array)
+            ids.append(id_container)
+
+        for i, ax in enumerate(ax.flat):
+            if i < size:
+                ax.bar(ids[i], cpu_values[i], color=colors[i])
+                ax.set_title(f"Time: {data[i]['time']}")
+                ax.set_ylabel("CPU Usage (%)")
+                ax.set_xlabel("ID Container")
+                ax.grid()
+            else:
+                ax.axis("off")
+        plt.tight_layout()
+        plt.savefig("graphs/cpu.png")
     return JSONResponse(status_code=200, content={"message": "Graphs created successfully"})
