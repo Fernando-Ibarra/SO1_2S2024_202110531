@@ -1,0 +1,1 @@
+/home/fernando/Documentos/University/SO1_2S2024_202110531/tare3/target/debug/rust_module: /home/fernando/Documentos/University/SO1_2S2024_202110531/tare3/crates/rust_module/src/lib.rs /home/fernando/Documentos/University/SO1_2S2024_202110531/tare3/crates/rust_module/src/main.rs
