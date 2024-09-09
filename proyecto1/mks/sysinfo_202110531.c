@@ -112,7 +112,7 @@ static int systeminfo_show(struct seq_file *m, void *v) {
         }
     }
     // Remove the last comma from the last process
-
+    
     seq_printf(m, "\n\t]\n");
     seq_printf(m, "}\n");
 
