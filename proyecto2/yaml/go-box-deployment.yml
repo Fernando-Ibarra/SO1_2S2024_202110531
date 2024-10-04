@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-server-box
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-server-box
+  template:
+    metadata:
+      labels:
+        app: go-server-box
+    spec:
+      containers:
+      - name: go-container
+        image: feribarra27/go-server-box
+        ports:
+        - containerPort: 3002
+        resources:               # Aquí colocas los recursos
+            requests:
+              memory: "512Mi"      # Memoria mínima solicitada
+              cpu: "250m"          # CPU mínima solicitada
+            limits:
+              memory: "2Gi"        # Límite máximo de memoria
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-service-box
+spec:
+  selector:
+    app: go-server-box
+  ports:
+    - protocol: TCP
+      port: 3002
+      targetPort: 3002
+  type: LoadBalancer

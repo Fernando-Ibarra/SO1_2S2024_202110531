@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-server-swim
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-server-swim
+  template:
+    metadata:
+      labels:
+        app: go-server-swim
+    spec:
+      containers:
+      - name: go-container
+        image: feribarra27/go-server-swim
+        ports:
+        - containerPort: 3000
+        resources:               # Aquí colocas los recursos
+            requests:
+              memory: "512Mi"      # Memoria mínima solicitada
+              cpu: "250m"          # CPU mínima solicitada
+            limits:
+              memory: "2Gi"        # Límite máximo de memoria
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-service-swim
+spec:
+  selector:
+    app: go-server-swim
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: LoadBalancer

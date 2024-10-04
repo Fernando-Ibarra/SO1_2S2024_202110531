@@ -1,0 +1,20 @@
+syntax="proto3";
+
+package main;
+
+service Athleteuide {
+    rpc CreateAthlete(AthleteRequest) returns (AthleteResponse) {}
+}
+
+message AthleteRequest {
+    string student = 1;
+    int64 age = 2;
+    string faculty = 3;
+    int64 discipline = 4;
+}
+
+message AthleteResponse {
+    string student = 1;
+}
+
+tonic::include_proto!("main");
