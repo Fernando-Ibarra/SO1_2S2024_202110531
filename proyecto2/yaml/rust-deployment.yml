@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rust-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rust-server
+  template:
+    metadata:
+      labels:
+        app: rust-server
+    spec:
+      containers:
+      - name: rust-container
+        image: feribarra27/rust-server
+        ports:
+        - containerPort: 8080
+        resources:               # Aquí colocas los recursos
+            requests:
+              memory: "512Mi"      # Memoria mínima solicitada
+              cpu: "250m"          # CPU mínima solicitada
+            limits:
+              memory: "2Gi"        # Límite máximo de memoria
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rust-service
+spec:
+  selector:
+    app: rust-server
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer
