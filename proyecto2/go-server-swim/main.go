@@ -22,7 +22,7 @@ func (s *ApiGrpcServer) CreateAthlete(ctx context.Context, req *pb.AthleteReques
 }
 
 func main() {
-	listen, err := net.Listen("tcp", "localhost:3000")
+	listen, err := net.Listen("tcp", "0.0.0.0:3000")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

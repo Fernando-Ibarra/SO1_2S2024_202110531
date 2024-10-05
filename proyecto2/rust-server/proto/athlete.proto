@@ -16,5 +16,3 @@ message AthleteRequest {
 message AthleteResponse {
     string student = 1;
 }
-
-tonic::include_proto!("main");

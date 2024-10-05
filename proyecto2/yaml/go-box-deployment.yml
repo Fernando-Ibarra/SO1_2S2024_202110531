@@ -13,8 +13,8 @@ spec:
         app: go-server-box
     spec:
       containers:
-      - name: go-container
-        image: feribarra27/go-server-box
+      - name: go-container-box
+        image: feribarra27/go-server-box:latest
         ports:
         - containerPort: 3002
         resources:               # Aquí colocas los recursos
@@ -36,4 +36,4 @@ spec:
     - protocol: TCP
       port: 3002
       targetPort: 3002
-  type: LoadBalancer
+  type: ClusterIP

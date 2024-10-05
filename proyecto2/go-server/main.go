@@ -19,7 +19,7 @@ type athlete struct {
 }
 
 func grpcGoSwimming(newAthlete athlete) {
-	conn, err := grpc.NewClient("localhost:3000", grpc.WithInsecure())
+	conn, err := grpc.NewClient("go-service-swim:3000", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("failed to connect: %v", err)
 	}
@@ -34,7 +34,7 @@ func grpcGoSwimming(newAthlete athlete) {
 }
 
 func grpcGoRunning(newAthlete athlete) {
-	conn, err := grpc.NewClient("localhost:3001", grpc.WithInsecure())
+	conn, err := grpc.NewClient("go-service-run:3001", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("failed to connect: %v", err)
 	}
@@ -49,7 +49,7 @@ func grpcGoRunning(newAthlete athlete) {
 }
 
 func grpcGoBoxing(newAthlete athlete) {
-	conn, err := grpc.NewClient("localhost:3002", grpc.WithInsecure())
+	conn, err := grpc.NewClient("go-service-box:3002", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("failed to connect: %v", err)
 	}
@@ -83,6 +83,5 @@ func postAthlete(c *gin.Context) {
 func main() {
 	router := gin.Default()
 	router.POST("/", postAthlete)
-
-	router.Run("localhost:8080")
+	router.Run("0.0.0.0:8080")
 }

@@ -13,8 +13,8 @@ spec:
         app: go-server-swim
     spec:
       containers:
-      - name: go-container
-        image: feribarra27/go-server-swim
+      - name: go-container-swim
+        image: feribarra27/go-server-swim:latest
         ports:
         - containerPort: 3000
         resources:               # Aquí colocas los recursos
@@ -36,4 +36,4 @@ spec:
     - protocol: TCP
       port: 3000
       targetPort: 3000
-  type: LoadBalancer
+  type: ClusterIP

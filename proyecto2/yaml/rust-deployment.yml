@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: rust-container
-        image: feribarra27/rust-server
+        image: feribarra27/rust-server:latest
         ports:
         - containerPort: 8080
         resources:               # Aquí colocas los recursos

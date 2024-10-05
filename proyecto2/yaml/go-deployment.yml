@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: go-container
-        image: feribarra27/go-server
+        image: feribarra27/go-server:latest
         ports:
         - containerPort: 8080
         resources:               # Aquí colocas los recursos
