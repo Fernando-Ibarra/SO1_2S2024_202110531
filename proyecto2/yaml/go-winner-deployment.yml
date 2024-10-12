@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: go-server-swim
+  name: go-winner-consumer
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: go-server-swim
+      app: go-winner-consumer
   template:
     metadata:
       labels:
-        app: go-server-swim
+        app: go-winner-consumer
     spec:
       containers:
-      - name: go-container-swim
-        image: feribarra27/go-server-swim:latest
+      - name: go-container-winner
+        image: feribarra27/go-winner-consumer:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 3000
+        - containerPort: 3004
         resources:
           requests:
             cpu: "50m"
@@ -29,12 +29,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: go-service-swim
+  name: go-service-winner
 spec:
   selector:
-    app: go-server-swim
+    app: go-winner-consumer
   ports:
     - protocol: TCP
-      port: 3000
-      targetPort: 3000
+      port: 3004
+      targetPort: 3004
   type: ClusterIP

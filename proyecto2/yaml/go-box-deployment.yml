@@ -15,15 +15,16 @@ spec:
       containers:
       - name: go-container-box
         image: feribarra27/go-server-box:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 3002
-        resources:               # Aquí colocas los recursos
-            requests:
-              memory: "512Mi"      # Memoria mínima solicitada
-              cpu: "250m"          # CPU mínima solicitada
-            limits:
-              memory: "2Gi"        # Límite máximo de memoria
-              cpu: "500m"
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "32Mi"
+          limits:
+            cpu: "100m"
+            memory: "64Mi"
 ---
 apiVersion: v1
 kind: Service

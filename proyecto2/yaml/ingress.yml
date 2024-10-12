@@ -9,14 +9,14 @@ spec:
   rules:
   - http:
       paths:
-      - path: /rust
+      - path: /agronomia
         pathType: Prefix
         backend:
           service:
             name: rust-service
             port:
               number: 80
-      - path: /go
+      - path: /ingenieria
         pathType: Prefix
         backend:
           service:
