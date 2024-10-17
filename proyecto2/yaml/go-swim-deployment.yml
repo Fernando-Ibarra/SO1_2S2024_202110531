@@ -17,14 +17,14 @@ spec:
         image: feribarra27/go-server-swim:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 3000
+        - containerPort: 3001
         resources:
           requests:
             cpu: "50m"
-            memory: "32Mi"
+            memory: "16Mi"
           limits:
             cpu: "100m"
-            memory: "64Mi"
+            memory: "32Mi"
 ---
 apiVersion: v1
 kind: Service
@@ -35,6 +35,6 @@ spec:
     app: go-server-swim
   ports:
     - protocol: TCP
-      port: 3000
-      targetPort: 3000
+      port: 3001
+      targetPort: 3001
   type: ClusterIP

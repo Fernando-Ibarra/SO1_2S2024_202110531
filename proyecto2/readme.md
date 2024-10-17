@@ -13,8 +13,8 @@ kubectl get hpa
 
 
 ### To-do
-```bash
-redis
-grafana
-prometheus
-```
+- Crear imagenes de winner y loser
+- Levantar cluster
+- crear winner
+- seguir ejemplo de bash para hacer los deployment
+- grafana

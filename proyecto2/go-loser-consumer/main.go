@@ -1,6 +1,9 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -8,7 +11,10 @@ import (
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/redis/go-redis/v9"
 )
+
+var ctx = context.Background()
 
 type KafkaData struct {
 	Student    string `json:"student"`
@@ -34,6 +40,19 @@ func main() {
 		log.Fatalf("Error al crear el consumidor: %s\n", err)
 	}
 
+	redis_db := redis.NewClient(&redis.Options{
+		Addr:     "redis-service:6379",
+		Password: "M1R3D1SP4SSW0RD", // no password set
+		DB:       0,                 // use default DB
+	})
+
+	_, err = redis_db.Ping(ctx).Result()
+	if err != nil {
+		log.Fatalf("Error al conectar a redis: %s\n", err)
+	}
+
+	fmt.Println("Conectado a la redis")
+
 	topic := "losers"
 	err = c.Subscribe(topic, nil)
 	if err != nil {
@@ -54,6 +73,24 @@ func main() {
 			msg, err := c.ReadMessage(100 * time.Millisecond)
 			if err != nil {
 				continue
+			}
+
+			vote := KafkaData{}
+			err = json.Unmarshal(msg.Value, &vote)
+
+			if redis_db != nil {
+				// faculty by student
+				err = redis_db.HIncrBy(ctx, "votos_alumnos", vote.Faculty, 1).Err()
+				if err != nil {
+					log.Printf("Error al incrementar votos por album: %s\n", err)
+				}
+
+				err = redis_db.HIncrBy(ctx, "votos_alumnos_perdedores", vote.Faculty, 1).Err()
+				if err != nil {
+					log.Printf("Error al incrementar votos por album: %s\n", err)
+				}
+			} else {
+				log.Printf("No se pudo conectar a redis")
 			}
 
 			log.Printf("Mensaje recibido: %s\n", string(msg.Value))

@@ -17,14 +17,14 @@ spec:
         image: feribarra27/go-loser-consumer:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 3005
+        - containerPort: 3006
         resources:
           requests:
             cpu: "50m"
-            memory: "32Mi"
+            memory: "16Mi"
           limits:
             cpu: "100m"
-            memory: "64Mi"
+            memory: "32Mi"
 ---
 apiVersion: v1
 kind: Service
@@ -35,6 +35,6 @@ spec:
     app: go-loser-consumer
   ports:
     - protocol: TCP
-      port: 3005
-      targetPort: 3005
+      port: 3006
+      targetPort: 3006
   type: ClusterIP

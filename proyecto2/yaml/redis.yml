@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-configmap
+data:
+  redis-config: |
+    dir /data
+    requirepass M1R3D1SP4SSW0RD
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: redis
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis
+          command:
+            - redis-server
+            - /redisconf/redis.conf
+          ports:
+            - containerPort: 6379
+          resources:
+            limits:
+              cpu: "300m"
+              memory: "256Mi"
+          volumeMounts:
+            - mountPath: /redisconf
+              name: config
+      volumes:
+        - name: config
+          configMap:
+            name: redis-configmap
+            items:
+              - key: redis-config
+                path: redis.conf
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: redis
+  name: redis-service
+spec:
+  ports:
+    - port: 6379
+      protocol: TCP
+      targetPort: 6379
+  selector:
+    app: redis
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service-loadbalancer
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 6379
+      targetPort: 6379
+  selector:
+    app: redis

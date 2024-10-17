@@ -1,0 +1,1 @@
+gcloud container clusters get-credentials proyecto2 --zone us-east5

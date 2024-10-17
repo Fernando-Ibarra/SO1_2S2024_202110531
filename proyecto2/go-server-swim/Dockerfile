@@ -7,5 +7,5 @@ RUN go build -o ./go-server-swim
 FROM gcr.io/distroless/base-debian12 AS runtime
 WORKDIR /app
 COPY --from=builder /build/go-server-swim /go-server-swim
-EXPOSE 3000
+EXPOSE 3001
 CMD ["/go-server-swim"]

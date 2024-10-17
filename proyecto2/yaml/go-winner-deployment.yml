@@ -17,14 +17,14 @@ spec:
         image: feribarra27/go-winner-consumer:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 3004
+        - containerPort: 3005
         resources:
           requests:
             cpu: "50m"
-            memory: "32Mi"
+            memory: "16Mi"
           limits:
             cpu: "100m"
-            memory: "64Mi"
+            memory: "32Mi"
 ---
 apiVersion: v1
 kind: Service
@@ -35,6 +35,6 @@ spec:
     app: go-winner-consumer
   ports:
     - protocol: TCP
-      port: 3004
-      targetPort: 3004
+      port: 3005
+      targetPort: 3005
   type: ClusterIP

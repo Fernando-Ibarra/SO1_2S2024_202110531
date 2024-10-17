@@ -7,5 +7,5 @@ RUN go build -o ./go-winner-consumer
 FROM gcr.io/distroless/base-debian12 AS runtime
 WORKDIR /app
 COPY --from=builder /build/go-winner-consumer /go-winner-consumer
-EXPOSE 3004
+EXPOSE 3005
 CMD ["/go-winner-consumer"]

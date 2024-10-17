@@ -39,7 +39,7 @@ async fn create_athlete(athlete: Json<HttpAthleteRequest>) -> content::RawHtml<S
 }
 
 async fn grpc_swim_server(athlete: HttpAthleteRequest) -> Result<String, String> {
-    let mut client = match AthleteuideClient::connect("http://go-service-swim:3000").await {
+    let mut client = match AthleteuideClient::connect("http://go-service-swim:3001").await {
         Ok(client) => client,
         Err(e) => return Err(format!("Failed to connect to gRPC server Swim: {}", e)),
     };
@@ -60,7 +60,7 @@ async fn grpc_swim_server(athlete: HttpAthleteRequest) -> Result<String, String>
 }
 
 async fn grpc_run_server(athlete: HttpAthleteRequest) -> Result<String, String> {
-    let mut client = match AthleteuideClient::connect("http://go-service-run:3001").await {
+    let mut client = match AthleteuideClient::connect("http://go-service-run:3002").await {
         Ok(client) => client,
         Err(e) => return Err(format!("Failed to connect to gRPC server Run: {}", e)),
     };
@@ -79,7 +79,7 @@ async fn grpc_run_server(athlete: HttpAthleteRequest) -> Result<String, String> 
 }
 
 async fn grpc_box_server(athlete: HttpAthleteRequest) -> Result<String, String> {
-    let mut client = match AthleteuideClient::connect("http://go-service-box:3002").await {
+    let mut client = match AthleteuideClient::connect("http://go-service-box:3003").await {
         Ok(client) => client,
         Err(e) => return Err(format!("Failed to connect to gRPC server Run: {}", e)),
     };

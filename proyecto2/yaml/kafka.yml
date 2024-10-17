@@ -22,19 +22,47 @@ spec:
       default.replication.factor: 1
       min.insync.replicas: 1
       inter.broker.protocol.version: "3.7"
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "150m"
+      limits:
+        memory: "1Gi"
+        cpu: "200m"
     storage:
       type: jbod
       volumes:
         - id: 0
           type: persistent-claim
-          size: 10Gi
+          size: 5Gi
           deleteClaim: false
   zookeeper:
     replicas: 1
+    resources:
+      requests:
+        memory: "128Mi"    # Reduce los recursos solicitados para Zookeeper
+        cpu: "100m"
+      limits:
+        memory: "256Mi"    # Limita los recursos máximos para Zookeeper
+        cpu: "200m"
     storage:
       type: persistent-claim
-      size: 10Gi
+      size: 3Gi
       deleteClaim: false
   entityOperator:
-    topicOperator: {}
-    userOperator: {}
+    topicOperator:
+      resources:
+        requests:
+          memory: "96Mi"
+          cpu: "100m"
+        limits:
+          memory: "128Mi"
+          cpu: "200m"
+    userOperator:
+      resources:
+        requests:
+          memory: "96Mi"
+          cpu: "100m"
+        limits:
+          memory: "128Mi"
+          cpu: "200m"
