@@ -114,12 +114,12 @@ func (s *ApiGrpcServer) CreateAthlete(ctx context.Context, req *pb.AthleteReques
 	}
 	if playerStatus == 0 {
 		log.Printf("Ganador: %v", req.Student)
-		sendWinner(dataPlayer)
+		go sendWinner(dataPlayer)
 		return &msg, nil
 	}
 
 	log.Printf("Perdedor: %v", req.Student)
-	sendLosser(dataPlayer)
+	go sendLosser(dataPlayer)
 	return &msg, nil
 }
 

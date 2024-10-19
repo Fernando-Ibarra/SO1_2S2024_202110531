@@ -1,4 +1,4 @@
-FROM grafana/grafana-oss
+FROM grafana/grafana
 
 ADD ./provisioning /etc/grafana/provisioning
 
