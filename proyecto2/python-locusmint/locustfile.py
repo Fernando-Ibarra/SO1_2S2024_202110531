@@ -8,26 +8,24 @@ class PostStudent(HttpUser):
 
     @task()
     def post_student_faculty_1(self):
-        for i in range(1500):
-            data_faculty_1 = {
-                "student": self.fake.name(),
-                "age": self.fake.random_int(min=18, max=25),
+        i = self.fake.random_int(min=1, max=100)
+        age = self.fake.random_int(min=18, max=25)
+        discipline = self.fake.random_int(min=1, max=3)
+        name = self.fake.name()
+        if i % 2 == 0:
+            data = {
+                "student": name,
+                "age": age,
                 "faculty": "Ingenieria",
-                "discipline": self.fake.random_int(min=1, max=3)
+                "discipline": discipline
             }
-
-            data_faculty_2 = {
-                "student": self.fake.name(),
-                "age": self.fake.random_int(min=18, max=25),
+            self.client.post(f"/ingenieria", json=data)
+        else:
+            data = {
+                "student": name,
+                "age": age,
                 "faculty": "Agronomia",
-                "discipline": self.fake.random_int(min=1, max=3)
+                "discipline": discipline
             }
-
-            # math random number to decide which faculty to post
-            if i % 2 == 0:
-                data = data_faculty_1
-                self.client.post(f"/ingenieria", json=data)
-            else:
-                data = data_faculty_2
-                self.client.post(f"/agronomia", json=data)
-            time.sleep(1)
+            self.client.post(f"/agronomia", json=data)
+        time.sleep(1)

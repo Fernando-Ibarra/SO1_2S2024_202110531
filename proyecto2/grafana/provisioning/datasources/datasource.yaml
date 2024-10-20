@@ -1,5 +1,3 @@
-apiVersion: 1
-
 datasources:
   - name: Redis
     type: redis-datasource
@@ -16,5 +14,13 @@ datasources:
     editable: true
     secureJsonData:
       password: M1R3D1SP4SSW0RD
-
-    apiVersion: 1
+    version: 1
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    isDefault: false
+    orgId: 1
+    url: http://prometheus-service:9090
+    uid: M1PR0M3TH3USP4SSW0RD
+    editable: true
+    version: 1

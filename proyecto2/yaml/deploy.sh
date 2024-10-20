@@ -3,7 +3,7 @@
 echo "Aplicando los archivos YAML de Kubernetes..."
 
 echo "Aplicando Ingress..."
-kubectl create ns nginx-ingress
+kubectl create ns ingress-nginx
 kubectl apply -f ingress.yml
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
 
