@@ -1,7 +1,6 @@
-gcloud container clusters get-credentials proyecto2 --zone us-central1-a
+gcloud container clusters get-credentials proyecto2 --zone us-central1-c
 
 gcloud container clusters create proyecto2 --enable-autoscaling --num-nodes 5 --min-nodes 1 --max-nodes 5 --region=us-central1
-
 
 gcloud container clusters create proyecto2 --num-nodes=3 --region=us-west1-a --tags=allin,allout --machine-type=e2-medium --no-enable-network-policy --disk-size=25GB --disk-type pd-standard
 

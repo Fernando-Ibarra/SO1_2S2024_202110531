@@ -2,7 +2,43 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: grafana-datasources
-data: {}
+data:
+  datasource.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Redis
+        type: redis-datasource
+        access: proxy
+        isDefault: true
+        orgId: 1
+        url: redis://redis-service:6379
+        jsonData:
+          poolSize: 5
+          timeout: 10
+        secureJsonData:
+          password: M1R3D1SP4SSW0RD
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: default
+data:
+  dashboard.yaml: |
+    {
+      "apiVersion": 1,
+      "providers": [
+        {
+          "name": "Redis",
+          "folder": "",
+          "type": "file",
+          "options": {
+            "path": "/etc/grafana/provisioning/dashboards"
+          }
+        }
+      ]
+    }
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -39,6 +75,9 @@ spec:
             - mountPath: /etc/grafana/provisioning/datasources
               name: grafana-datasources
               readOnly: false
+            - mountPath: /etc/grafana/provisioning/dashboards
+              name: grafana-dashboards
+              readOnly: true
       volumes:
         - name: grafana-storage
           emptyDir: {}
@@ -46,6 +85,10 @@ spec:
           configMap:
             defaultMode: 420
             name: grafana-datasources
+        - name: grafana-dashboards
+          configMap:
+            defaultMode: 420
+            name: grafana-dashboards
 ---
 apiVersion: v1
 kind: Service

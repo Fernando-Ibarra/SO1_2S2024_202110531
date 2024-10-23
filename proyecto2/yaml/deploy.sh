@@ -43,6 +43,7 @@ helm repo add prometheus-community https://prometheus-community.github.io/helm-c
 helm repo update
 helm install prometheus prometheus-community/prometheus
 
+# prometheus-server.default.svc.cluster.local
 
 kubectl get pods -n ingress-nginx
 kubectl get pods -n kafka
