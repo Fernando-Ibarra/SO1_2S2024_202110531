@@ -5,22 +5,3 @@ gcloud container clusters create proyecto2 --enable-autoscaling --num-nodes 5 --
 gcloud container clusters create proyecto2 --num-nodes=3 --region=us-west1-a --tags=allin,allout --machine-type=e2-medium --no-enable-network-policy --disk-size=25GB --disk-type pd-standard
 
 gcloud container clusters get-credentials proyecto2 --zone us-west1-a
-
-
-
-  prometheus.yaml: |-
-    {
-        "apiVersion": 1,
-        "datasources": [
-            {
-               "access": "proxy",
-               "editable": true,
-               "name": "redis",
-               "orgId": 1,
-               "password": "M1R3D1SP4SSW0RD",
-               "type": "redis",
-               "url": "redis://redis-service:6379",
-               "version": 1
-            }
-        ]
-    }

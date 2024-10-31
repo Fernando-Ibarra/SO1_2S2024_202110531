@@ -25,6 +25,9 @@ kubectl apply -f rust-deployment.yml
 echo "Aplicando Horizontal Pod Autoscalers (HPA)..."
 kubectl apply -f go-hpa.yml
 kubectl apply -f rust-hpa.yml
+kubectl apply -f go-run-hpa.yml
+kubectl apply -f go-swim-hpa.yml
+kubectl apply -f go-box-hpa.yml
 
 echo "Aplicando los servicios..."
 kubectl apply -f go-swim-deployment.yml
@@ -43,7 +46,7 @@ helm repo add prometheus-community https://prometheus-community.github.io/helm-c
 helm repo update
 helm install prometheus prometheus-community/prometheus
 
-# prometheus-server.default.svc.cluster.local
+# http://prometheus-server.default.svc.cluster.local
 
 kubectl get pods -n ingress-nginx
 kubectl get pods -n kafka
